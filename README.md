@@ -41,10 +41,14 @@ CHECK_INTERVAL_SECONDS=300
 # Default interval 5 minutes (300)
 PURGE_THRESHOLD_SECONDS=604800
 # Default threshold 7 days (604800)
+
+#EXCEPTED SERVERS (UUIDs)
+EXCEPTED_SERVERS="excepted-server-one,excepted-server-two"
 ```
 Go to `https://panel.domain.com/admin/api` to get yourself an Application API Key for your panel.
 For the CLient API Key you'll need to go onto your account settings in the panel and create one there.
 Then you can set up the check interval and prune threshold to your liking or leave it as the default values.
+You can also add servers to the excepted list by adding a list of comma-separated server uuids as the value of `EXCEPTED_SERVERS`.
 And just like that the .env setup is done!
 
 # Running
