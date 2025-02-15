@@ -18,11 +18,28 @@ def get_all_servers():
     headers = {'Authorization': f'Bearer {APP_KEY}', 'Accept': 'application/json'}
     response = requests.get(f'{PANEL_URL}/api/application/servers', headers=headers)
     servers = response.json()['data']
-    return [server['attributes']['uuid'] for server in servers]
+    return servers
 
 
-def delete_server(server_id):
-    print(f"[TEST] Would delete server {server_id}")
+def delete_server(container_name):
+    server = next((server for server in all_servers if server['attributes']['uuid'] == container_name), None)
+    if server:
+        server_id = server['attributes']['id']
+        server_name = server['attributes']['name']
+        headers = {'Authorization': f'Bearer {CLIENT_KEY}'}
+        response = requests.delete(f'{PANEL_URL}/api/client/servers/{server_id}', headers=headers)
+        if response.status_code == 204:
+            print(f"Successfully deleted server '{server_name}' (UUID: {container_name})")
+        else:
+            print(
+                f"Failed to delete server '{server_name}' (UUID: {container_name}) - Status Code: {response.status_code}")
+            try:
+                error_details = response.json()
+                print(f"Error details: {error_details}")
+            except json.JSONDecodeError:
+                print("No JSON response, raw response:", response.text)
+    else:
+        print(f"Server with UUID {container_name} not found.")
 
 
 def get_exited_containers():
@@ -45,12 +62,14 @@ while True:
     print(f"Check Interval: {CHECK_INTERVAL} seconds")
     print(f"Purge Threshold: {PURGE_THRESHOLD} seconds")
     print("Checking servers...")
-    active_servers = set(get_all_servers())
+    all_servers = get_all_servers()
+
     for container in get_exited_containers():
         container_name = container.get("Name", "").strip('/')
         running_for = parse_running_for(container.get("State", {}))
         print(f"Container {container_name}: Offline for {running_for} seconds")
-        if container_name in active_servers and running_for > PURGE_THRESHOLD:
+
+        if container_name in [server['attributes']['uuid'] for server in all_servers] and running_for > PURGE_THRESHOLD:
             print(f"Server {container_name} exceeded threshold. Deleting...")
             delete_server(container_name)
     time.sleep(CHECK_INTERVAL)
