@@ -48,7 +48,7 @@ EXCEPTED_SERVERS="excepted-server-one,excepted-server-two"
 ```
 Go to `https://panel.domain.com/admin/api` to get yourself an Application API Key for your panel.
 
-For the CLient API Key you'll need to go onto your account settings in the panel and create one there.
+For the Client API Key you'll need to go onto your account settings in the panel and create one there.
 
 Then you can set up the check interval and prune threshold to your liking or leave it as the default values.
 
