@@ -12,7 +12,7 @@ CLIENT_KEY = os.getenv("CLIENT_API_KEY")
 PANEL_URL = os.getenv("PANEL_URL")
 CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL_SECONDS", 300))
 PURGE_THRESHOLD = int(os.getenv("PURGE_THRESHOLD_SECONDS", 604800))
-
+EXCEPTED_SERVERS = os.getenv("EXCEPTED_SERVERS", "").split(',')
 
 def get_all_servers():
     headers = {'Authorization': f'Bearer {APP_KEY}', 'Accept': 'application/json'}
@@ -68,6 +68,10 @@ while True:
         container_name = container.get("Name", "").strip('/')
         running_for = parse_running_for(container.get("State", {}))
         print(f"Container {container_name}: Offline for {running_for} seconds")
+
+        if container_name in EXCEPTED_SERVERS:
+            print(f"Server {container_name} is excepted from deletion. Skipping...")
+            continue
 
         if container_name in [server['attributes']['uuid'] for server in all_servers] and running_for > PURGE_THRESHOLD:
             print(f"Server {container_name} exceeded threshold. Deleting...")
